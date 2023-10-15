@@ -5,7 +5,6 @@ import {
   useSignal,
   useSignalEffect,
 } from "@preact/signals";
-import { Button } from "../components/Button.tsx";
 import { useEffect } from "preact/hooks";
 import { Permission, Program } from "../../seal/main.ts";
 
