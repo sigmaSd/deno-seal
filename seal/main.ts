@@ -2,8 +2,8 @@ import homeDir from "https://deno.land/x/dir@1.5.1/home_dir/mod.ts";
 import * as path from "https://deno.land/std@0.204.0/path/mod.ts";
 import * as infer from "npm:deno-infer@1.0.5";
 
-type Permission = { allowed: boolean; entries?: string[] };
-type PermissionType = "read" | "write" | "run" | "net" | "ffi" | "env";
+export type Permission = { allowed: boolean; entries?: string[] };
+export type PermissionType = "read" | "write" | "run" | "net" | "ffi" | "env";
 
 export class Program {
   path: string;
@@ -29,42 +29,42 @@ export class Program {
     return { cmd, parts };
   }
 
-  read() {
+  read(): Permission {
     return this._parsePermission("--allow-read");
   }
   setRead(permissionSet: Permission) {
     this._setPermission("read", permissionSet);
     return this;
   }
-  write() {
+  write(): Permission {
     return this._parsePermission("--allow-write");
   }
   setWrite(permission: Permission) {
     this._setPermission("write", permission);
     return this;
   }
-  run() {
+  run(): Permission {
     return this._parsePermission("--allow-run");
   }
   setRun(permission: Permission) {
     this._setPermission("run", permission);
     return this;
   }
-  env() {
+  env(): Permission {
     return this._parsePermission("--allow-env");
   }
   setEnv(permission: Permission) {
     this._setPermission("env", permission);
     return this;
   }
-  net() {
+  net(): Permission {
     return this._parsePermission("--allow-net");
   }
   setNet(permission: Permission) {
     this._setPermission("net", permission);
     return this;
   }
-  ffi() {
+  ffi(): Permission {
     return this._parsePermission("--allow-ffi");
   }
   setFfi(permission: Permission) {
@@ -162,7 +162,7 @@ function* getPrograms() {
   }
 }
 
-function createProgramMap() {
+export function createProgramMap() {
   const programMap: Record<string, Program> = {};
   for (const entry of getPrograms()) {
     const { name, path } = entry;
