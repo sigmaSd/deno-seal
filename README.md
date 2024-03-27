@@ -4,7 +4,8 @@ FlatSeal like permission manager for deno
 
 ## Usage
 
-```sh
+```
+git clone https://github.com/sigmaSd/deno-seal
 cd ui
 deno task start
 ```
