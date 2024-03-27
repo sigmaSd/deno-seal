@@ -9,3 +9,14 @@ export interface PermissionMap {
   net: Permission;
   all: Permission;
 }
+
+export type Message =
+  | {
+    method: "getPermission";
+    name: string;
+  }
+  | {
+    method: "updatePermission";
+    name: string;
+    permissionMap: PermissionMap;
+  };

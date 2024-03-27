@@ -37,6 +37,34 @@ export class Program {
     return { cmd, parts };
   }
 
+  setPermissionByName(
+    permissionName: string,
+    permission: Permission,
+  ) {
+    switch (permissionName) {
+      case "read":
+        this.setRead(permission);
+        break;
+      case "write":
+        this.setWrite(permission);
+        break;
+      case "env":
+        this.setEnv(permission);
+        break;
+      case "ffi":
+        this.setFfi(permission);
+        break;
+      case "net":
+        this.setNet(permission);
+        break;
+      case "run":
+        this.setRun(permission);
+        break;
+      case "all":
+        this.setAll(permission);
+        break;
+    }
+  }
   read(): Permission {
     return this.#parsePermission("--allow-read");
   }
@@ -82,8 +110,8 @@ export class Program {
   all() {
     return this.#parsePermission("--allow-all");
   }
-  setAll() {
-    this.#setPermission("all", { allowed: true });
+  setAll(permission: Permission) {
+    this.#setPermission("all", permission);
     return this;
   }
 
@@ -111,7 +139,7 @@ export class Program {
   }
 
   #setPermission(type: PermissionType, permission: Permission) {
-    const typeToPermission = (type: string) => {
+    const permissionFlag = (() => {
       switch (type) {
         case "read":
           return "--allow-read";
@@ -125,40 +153,31 @@ export class Program {
           return "--allow-ffi";
         case "env":
           return "--allow-env";
+        case "all":
+          return "--allow-all";
         default:
           throw new Error(`type: ${type} not handled`);
       }
-    };
+    })();
+    const finalPermissionForm =
+      (permission.entries && permission.entries.length > 0)
+        ? `${permissionFlag}=${permission.entries?.join(",")}` // --allow-net=["a","b"]
+        : permissionFlag; // --allow-net
 
-    const idx = this.parts.findIndex((part) =>
-      part.startsWith(typeToPermission(type))
-    );
+    const idx = this.parts.findIndex((part) => part.startsWith(permissionFlag));
 
     if (!permission.allowed) {
       if (idx !== -1) {
+        // remove the exisiting permission
         this.parts.splice(idx, 1);
       }
     } else if (permission.allowed) {
       if (idx === -1) {
-        if (permission.entries && permission.entries.length > 0) {
-          this.parts.splice(
-            3,
-            0,
-            `${typeToPermission(type)}=${permission.entries.join(",")}`,
-          );
-        } else {
-          this.parts.splice(3, 0, typeToPermission(type));
-        }
+        // the permission is not there already so put it anywhere
+        this.parts.splice(3, 0, finalPermissionForm);
       } else {
-        if (permission.entries && permission.entries.length > 0) {
-          this.parts.splice(
-            3,
-            0,
-            `${typeToPermission(type)}=${permission.entries.join(",")}`,
-          );
-        } else {
-          this.parts.splice(3, 0, typeToPermission(type));
-        }
+        // the permission is there already so we replace it
+        this.parts[idx] = finalPermissionForm;
       }
     }
   }

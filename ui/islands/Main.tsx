@@ -1,24 +1,37 @@
 import { type Signal, useSignal, useSignalEffect } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import type { Permission } from "../../seal/main.ts";
-import type { PermissionMap } from "../types/mod.ts";
+import type { Message, PermissionMap } from "../types/mod.ts";
 
 export default function Main() {
   const currentApp: Signal<string | undefined> = useSignal(undefined);
+  const showAcceptButton = useSignal(false);
   return (
     <div>
-      <div class="flex gap-2">
-        <AppList currentApp={currentApp} />
+      <div class="flex flex-col gap-2">
+        <AppList
+          currentApp={currentApp}
+          showAcceptButton={showAcceptButton}
+        />
         {currentApp.value && (
-          <AppSettingsView name={currentApp as Signal<string>} />
+          <AppSettingsView
+            name={currentApp as Signal<string>}
+            showAcceptButton={showAcceptButton}
+          />
         )}
       </div>
     </div>
   );
 }
 
-function AppList({ currentApp }: { currentApp: Signal<string | undefined> }) {
+function AppList(
+  { currentApp, showAcceptButton }: {
+    currentApp: Signal<string | undefined>;
+    showAcceptButton: Signal<boolean>;
+  },
+) {
   const chooseApp = (app: string) => {
+    showAcceptButton.value = false;
     currentApp.value = app;
   };
   const programList: Signal<string[]> = useSignal([]);
@@ -30,7 +43,7 @@ function AppList({ currentApp }: { currentApp: Signal<string | undefined> }) {
       });
   }, []);
   return (
-    <div class="flex flex-col gap-1">
+    <div class="flex flex-row flex-wrap gap-1">
       {programList.value?.map((name) => {
         return (
           <button
@@ -46,70 +59,88 @@ function AppList({ currentApp }: { currentApp: Signal<string | undefined> }) {
   );
 }
 
-function AppSettingsView({ name }: { name: Signal<string> }) {
+function AppSettingsView(
+  { name, showAcceptButton }: {
+    name: Signal<string>;
+    showAcceptButton: Signal<boolean>;
+  },
+) {
   const app: Signal<PermissionMap | undefined> = useSignal(undefined);
 
   useSignalEffect(() => {
-    fetch("/api/apps", { method: "POST", body: name.value })
+    fetch("/api/apps", {
+      method: "POST",
+      body: JSON.stringify(
+        { method: "getPermission", name: name.value } satisfies Message,
+      ),
+    })
       .then((res) => res.json())
       .then((data) => {
         app.value = data;
       });
   });
 
-  const pendingChanges = useSignal(false);
-
   return (
-    <div class="flex flex-col flex-grow gap-4">
+    <div class="flex flex-col flex-grow gap-4 ml-2">
       {app.value && (
         <>
           <h2 class="text-2xl font-bold">{name.value}</h2>
-          <button
-            type="button"
-            onClick={() => {
-              //TODO: commit the changes
-              pendingChanges.value = false;
-            }}
-            style={{ display: !pendingChanges.value ? "none" : "block" }}
-            class="bg-green-600 text-white text-base font-bold p-4 border-2 rounded-lg"
-          >
-            Apply
-          </button>
           <AppSetting
             name="Read"
             permission={app.value.read}
-            pendingChanges={pendingChanges}
+            pendingChanges={showAcceptButton}
           />
           <AppSetting
             name="Write"
             permission={app.value.write}
-            pendingChanges={pendingChanges}
+            pendingChanges={showAcceptButton}
           />
           <AppSetting
             name="Env"
             permission={app.value.env}
-            pendingChanges={pendingChanges}
+            pendingChanges={showAcceptButton}
           />
           <AppSetting
             name="Run"
             permission={app.value.run}
-            pendingChanges={pendingChanges}
+            pendingChanges={showAcceptButton}
           />
           <AppSetting
             name="Net"
             permission={app.value.net}
-            pendingChanges={pendingChanges}
+            pendingChanges={showAcceptButton}
           />
           <AppSetting
             name="FFi"
             permission={app.value.ffi}
-            pendingChanges={pendingChanges}
+            pendingChanges={showAcceptButton}
           />
           <AppSetting
             name="All"
             permission={app.value.all}
-            pendingChanges={pendingChanges}
+            pendingChanges={showAcceptButton}
           />
+          <button
+            type="button"
+            onClick={() => {
+              showAcceptButton.value = false;
+              if (!app.value) return;
+              fetch("/api/apps", {
+                method: "POST",
+                body: JSON.stringify(
+                  {
+                    method: "updatePermission",
+                    name: name.value,
+                    permissionMap: app.value,
+                  } satisfies Message,
+                ),
+              });
+            }}
+            style={{ display: !showAcceptButton.value ? "none" : "block" }}
+            class="bg-green-600 text-white text-base font-bold p-4 border-2 rounded-lg"
+          >
+            Apply
+          </button>
         </>
       )}
     </div>
@@ -136,12 +167,14 @@ function AppSetting(
         checked={permission.allowed}
       />
       <input
-        onChange={() => {
+        onChange={(event) => {
           pendingChanges.value = true;
+          //@ts-ignore value exists
+          permission.entries = event.target?.value.split(",");
         }}
         type="text"
         class="bg-red-100  border-gray-400 border-2 rounded-lg"
-        value={permission.entries ? permission.entries : ""}
+        value={permission.entries ? permission.entries.join(",") : ""}
       />
     </div>
   );

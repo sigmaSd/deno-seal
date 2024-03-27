@@ -30,4 +30,13 @@ exec deno run --allow-read --allow-write --allow-net --allow-env --allow-run=git
     entries: ["/path/to/ffi_lib.so"],
   });
   assertEquals(program.run(), { allowed: true, entries: ["ls"] });
+
+  program.setFfi({ allowed: true, entries: ["/path/to/ffi_lib2.so"] });
+  assertEquals(program.ffi(), {
+    allowed: true,
+    entries: ["/path/to/ffi_lib2.so"],
+  });
+
+  program.setPermissionByName("ffi", { allowed: false });
+  assertEquals(program.ffi(), { allowed: false });
 });
