@@ -2,6 +2,13 @@
 
 FlatSeal like permission manager for deno
 
+## Usage
+
+```sh
+cd ui
+deno task start
+```
+
 ## Current State
 
 The seal module is okaish, but the ui is alpha
