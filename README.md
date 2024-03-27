@@ -1,6 +1,6 @@
 # Deno Seal
 
-FlatSeal like permission manager for deno
+FlatSeal like permission manager for deno scripts
 
 ## Usage
 
