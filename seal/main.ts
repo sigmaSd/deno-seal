@@ -1,9 +1,16 @@
 import homeDir from "https://deno.land/x/dir@1.5.1/home_dir/mod.ts";
 import * as path from "https://deno.land/std@0.204.0/path/mod.ts";
-import * as infer from "npm:deno-infer@1.0.5";
+import * as infer from "jsr:@sigmasd/deno-infer@3.0.1";
 
 export type Permission = { allowed: boolean; entries?: string[] };
-export type PermissionType = "read" | "write" | "run" | "net" | "ffi" | "env";
+export type PermissionType =
+  | "read"
+  | "write"
+  | "run"
+  | "net"
+  | "ffi"
+  | "env"
+  | "all";
 
 export class Program {
   path: string;
@@ -11,17 +18,18 @@ export class Program {
   parts: string[];
 
   constructor(path: string) {
-    const { cmd, parts } = Program._parseEntry(path);
+    const { cmd, parts } = Program.#parseEntry(path);
     this.path = path;
     this.originalCmd = cmd;
     this.parts = parts;
   }
-  static _parseEntry(entry: string) {
+
+  static #parseEntry(entry: string) {
     const content = Deno.readTextFileSync(entry);
     const cmd = content.split("\n").find((line) => line.startsWith("exec"));
     if (cmd === undefined) {
       throw new Error(
-        "malformed program: " + entry + "\n" + "content: " + content,
+        `malformed program: ${entry}\ncontent: ${content}`,
       );
     }
 
@@ -30,45 +38,52 @@ export class Program {
   }
 
   read(): Permission {
-    return this._parsePermission("--allow-read");
+    return this.#parsePermission("--allow-read");
   }
   setRead(permissionSet: Permission) {
-    this._setPermission("read", permissionSet);
+    this.#setPermission("read", permissionSet);
     return this;
   }
   write(): Permission {
-    return this._parsePermission("--allow-write");
+    return this.#parsePermission("--allow-write");
   }
   setWrite(permission: Permission) {
-    this._setPermission("write", permission);
+    this.#setPermission("write", permission);
     return this;
   }
   run(): Permission {
-    return this._parsePermission("--allow-run");
+    return this.#parsePermission("--allow-run");
   }
   setRun(permission: Permission) {
-    this._setPermission("run", permission);
+    this.#setPermission("run", permission);
     return this;
   }
   env(): Permission {
-    return this._parsePermission("--allow-env");
+    return this.#parsePermission("--allow-env");
   }
   setEnv(permission: Permission) {
-    this._setPermission("env", permission);
+    this.#setPermission("env", permission);
     return this;
   }
   net(): Permission {
-    return this._parsePermission("--allow-net");
+    return this.#parsePermission("--allow-net");
   }
   setNet(permission: Permission) {
-    this._setPermission("net", permission);
+    this.#setPermission("net", permission);
     return this;
   }
   ffi(): Permission {
-    return this._parsePermission("--allow-ffi");
+    return this.#parsePermission("--allow-ffi");
   }
   setFfi(permission: Permission) {
-    this._setPermission("ffi", permission);
+    this.#setPermission("ffi", permission);
+    return this;
+  }
+  all() {
+    return this.#parsePermission("--allow-all");
+  }
+  setAll() {
+    this.#setPermission("all", { allowed: true });
     return this;
   }
 
@@ -82,7 +97,7 @@ export class Program {
     Deno.writeTextFileSync(this.path, newScript);
   }
 
-  _parsePermission(permission: string) {
+  #parsePermission(permission: string) {
     const permissionRaw = this.parts.find((part) =>
       part.startsWith(permission)
     );
@@ -90,12 +105,12 @@ export class Program {
     if (permissionRaw.includes("=")) {
       const allowedEntries = permissionRaw.split("=")[1].split(",");
       return { allowed: true, entries: allowedEntries };
-    } else {
-      return { allowed: true };
     }
+
+    return { allowed: true };
   }
 
-  _setPermission(type: PermissionType, permission: Permission) {
+  #setPermission(type: PermissionType, permission: Permission) {
     const typeToPermission = (type: string) => {
       switch (type) {
         case "read":
@@ -162,37 +177,29 @@ function* getPrograms() {
   }
 }
 
-export function createProgramMap() {
+export async function createProgramMap() {
   const programMap: Record<string, Program> = {};
   for (const entry of getPrograms()) {
     const { name, path } = entry;
-    if (getFromPath(path)?.extension() !== "sh") continue;
+    if (await infer.getFromPath(path)?.then((t) => t?.extension()) !== "sh") {
+      continue;
+    }
     const program = new Program(path);
     programMap[name] = program;
   }
   return programMap;
 }
 
-//TODO: remove this when infer is fixed
-/** Returns the file type of the file given a path. */
-export function getFromPath(path: string) {
-  const file = Deno.openSync(path, { read: true });
-  const limit = Math.min(file.statSync().size, 8192) + 1;
-  const bytes = new Uint8Array(limit);
-  file.readSync(bytes);
-  file.close();
-
-  return infer.get(bytes);
-}
-
 if (import.meta.main) {
-  const programMap = createProgramMap();
+  const programMap = await createProgramMap();
   for (const [n, p] of Object.entries(programMap)) {
     console.log(n);
     console.log("read", p.read());
     console.log("write", p.write());
     console.log("run", p.run());
     console.log("net", p.net());
+    console.log("all", p.all());
+    console.log();
   }
-  programMap["molt"].setRead({ allowed: true, entries: ["/etc/hosts"] });
+  // programMap.molt.setRead({ allowed: true, entries: ["/etc/hosts"] });
 }

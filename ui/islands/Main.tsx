@@ -1,12 +1,7 @@
-import {
-  effect,
-  type Signal,
-  useComputed,
-  useSignal,
-  useSignalEffect,
-} from "@preact/signals";
+import { type Signal, useSignal, useSignalEffect } from "@preact/signals";
 import { useEffect } from "preact/hooks";
-import { Permission, Program } from "../../seal/main.ts";
+import type { Permission } from "../../seal/main.ts";
+import type { PermissionMap } from "../types/mod.ts";
 
 export default function Main() {
   const currentApp: Signal<string | undefined> = useSignal(undefined);
@@ -36,36 +31,26 @@ function AppList({ currentApp }: { currentApp: Signal<string | undefined> }) {
   }, []);
   return (
     <div class="flex flex-col gap-1">
-      {programList.value &&
-        programList.value.map((name) => {
-          return (
-            <Button
-              onClick={() => chooseApp(name)}
-              class="bg-blue-800 text-white text-base font-bold p-4 m-2"
-            >
-              {name}
-            </Button>
-          );
-        })}
+      {programList.value?.map((name) => {
+        return (
+          <button
+            type="button"
+            onClick={() => chooseApp(name)}
+            class="bg-blue-800 text-white text-base font-bold p-4 m-2"
+          >
+            {name}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
 function AppSettingsView({ name }: { name: Signal<string> }) {
-  const app: Signal<
-    {
-      read: Permission;
-      write: Permission;
-      env: Permission;
-      run: Permission;
-      ffi: Permission;
-      net: Permission;
-    } | undefined
-  > = useSignal(undefined);
+  const app: Signal<PermissionMap | undefined> = useSignal(undefined);
 
   useSignalEffect(() => {
-    console.log("called");
-    fetch(`/api/apps`, { method: "POST", body: name.value })
+    fetch("/api/apps", { method: "POST", body: name.value })
       .then((res) => res.json())
       .then((data) => {
         app.value = data;
@@ -73,7 +58,6 @@ function AppSettingsView({ name }: { name: Signal<string> }) {
   });
 
   const pendingChanges = useSignal(false);
-  console.log(pendingChanges.value);
 
   return (
     <div class="flex flex-col flex-grow gap-4">
@@ -81,7 +65,9 @@ function AppSettingsView({ name }: { name: Signal<string> }) {
         <>
           <h2 class="text-2xl font-bold">{name.value}</h2>
           <button
+            type="button"
             onClick={() => {
+              //TODO: commit the changes
               pendingChanges.value = false;
             }}
             style={{ display: !pendingChanges.value ? "none" : "block" }}
@@ -119,6 +105,11 @@ function AppSettingsView({ name }: { name: Signal<string> }) {
             permission={app.value.ffi}
             pendingChanges={pendingChanges}
           />
+          <AppSetting
+            name="All"
+            permission={app.value.all}
+            pendingChanges={pendingChanges}
+          />
         </>
       )}
     </div>
@@ -132,14 +123,13 @@ function AppSetting(
     pendingChanges: Signal<boolean>;
   },
 ) {
-  console.log(permission.allowed);
-
   return (
     <div class="flex gap-4 items-center">
       <p className="text-lg font-bold">{name}</p>
       <input
         onChange={() => {
           pendingChanges.value = true;
+          permission.allowed = !permission.allowed;
         }}
         type="checkbox"
         class="rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"

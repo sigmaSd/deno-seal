@@ -1,7 +1,7 @@
-import { Handlers } from "$fresh/server.ts";
+import type { Handlers } from "$fresh/server.ts";
 import { createProgramMap } from "../../../seal/main.ts";
 
-const MAP = createProgramMap();
+const MAP = await createProgramMap();
 
 export const handler: Handlers = {
   GET(_req) {
@@ -18,6 +18,7 @@ export const handler: Handlers = {
       run: app.run(),
       ffi: app.ffi(),
       net: app.net(),
+      all: app.all(),
     }));
   },
 };
