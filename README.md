@@ -4,8 +4,10 @@ FlatSeal like permission manager for deno
 
 ## Current State
 
-The seal module is okaish, but the ui is pre alpha
+The seal module is okaish, but the ui is alpha
 
-![image](https://github.com/sigmaSd/deno-seal/assets/22427111/de187c7d-3b43-4a19-8595-86598a7cb1a4)
-![image](https://github.com/sigmaSd/deno-seal/assets/22427111/d1e45f06-740d-43fa-b64e-fa12d3db23a0)
+![image](https://github.com/sigmaSd/deno-seal/assets/22427111/c57ec01e-e387-4ab8-a00f-93796f3d5876)
 
+## Demo
+
+[Screencast from 2024-03-27 18-11-40.webm](https://github.com/sigmaSd/deno-seal/assets/22427111/abe7ac61-99ed-4937-adbc-214e723e45f2)
