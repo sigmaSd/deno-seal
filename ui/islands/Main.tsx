@@ -170,7 +170,9 @@ function AppSetting(
         onChange={(event) => {
           pendingChanges.value = true;
           //@ts-ignore value exists
-          permission.entries = event.target?.value.split(",");
+          permission.entries = event.target?.value
+            ? event.target.value.split(",")
+            : undefined;
         }}
         type="text"
         class="bg-red-100  border-gray-400 border-2 rounded-lg"
