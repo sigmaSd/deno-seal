@@ -171,6 +171,7 @@ function AppSetting(
           pendingChanges.value = true;
           //@ts-ignore value exists
           permission.entries = event.target?.value
+            //@ts-ignore value exists
             ? event.target.value.split(",")
             : undefined;
         }}
