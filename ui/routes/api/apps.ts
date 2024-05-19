@@ -1,6 +1,10 @@
 import type { Handlers } from "$fresh/server.ts";
 import type { Message } from "../../types/mod.ts";
-import { createProgramMap } from "../../../seal/main.ts";
+import {
+  createProgramMap,
+  type Permission,
+  PermissionNameWithAll,
+} from "../../../seal/main.ts";
 
 const MAP = await createProgramMap();
 
@@ -15,15 +19,20 @@ export const handler: Handlers = {
         const name = message.name;
         const app = MAP[name];
         if (!app) throw "app not found (FIXME)";
-        return new Response(JSON.stringify({
-          read: app.read(),
-          write: app.write(),
-          env: app.env(),
-          run: app.run(),
-          ffi: app.ffi(),
-          net: app.net(),
-          all: app.all(),
-        }));
+
+        return new Response(JSON.stringify(
+          {
+            read: app.read(),
+            write: app.write(),
+            env: app.env(),
+            run: app.run(),
+            ffi: app.ffi(),
+            net: app.net(),
+            sys: app.sys(),
+            hrtime: app.hrtime(),
+            all: app.all(),
+          } satisfies Record<PermissionNameWithAll, Permission>,
+        ));
       }
       case "updatePermission": {
         const name = message.name;
@@ -32,7 +41,11 @@ export const handler: Handlers = {
         for (
           const [permissionName, permission] of Object.entries(permissionMap)
         ) {
-          app.setPermissionByName(permissionName, permission);
+          app.setPermissionByName(
+            //TODO: make this more typesafe
+            permissionName as PermissionNameWithAll,
+            permission,
+          );
         }
         app.commit();
         return new Response();

@@ -3,14 +3,7 @@ import * as path from "https://deno.land/std@0.204.0/path/mod.ts";
 import * as infer from "jsr:@sigmasd/deno-infer@3.0.1";
 
 export type Permission = { allowed: boolean; entries?: string[] };
-export type PermissionType =
-  | "read"
-  | "write"
-  | "run"
-  | "net"
-  | "ffi"
-  | "env"
-  | "all";
+export type PermissionNameWithAll = Deno.PermissionName | "all";
 
 export class Program {
   path: string;
@@ -38,7 +31,7 @@ export class Program {
   }
 
   setPermissionByName(
-    permissionName: string,
+    permissionName: PermissionNameWithAll,
     permission: Permission,
   ) {
     switch (permissionName) {
@@ -60,9 +53,17 @@ export class Program {
       case "run":
         this.setRun(permission);
         break;
+      case "sys":
+        this.setSys(permission);
+        break;
+      case "hrtime":
+        this.setHrtime(permission);
+        break;
       case "all":
         this.setAll(permission);
         break;
+      default:
+        throw Error(`unkown permission: ${permissionName}`);
     }
   }
   read(): Permission {
@@ -98,6 +99,20 @@ export class Program {
   }
   setNet(permission: Permission) {
     this.#setPermission("net", permission);
+    return this;
+  }
+  sys(): Permission {
+    return this.#parsePermission("--allow-sys");
+  }
+  setSys(permission: Permission) {
+    this.#setPermission("sys", permission);
+    return this;
+  }
+  hrtime(): Permission {
+    return this.#parsePermission("--allow-hrtime");
+  }
+  setHrtime(permission: Permission) {
+    this.#setPermission("hrtime", permission);
     return this;
   }
   ffi(): Permission {
@@ -138,7 +153,7 @@ export class Program {
     return { allowed: true };
   }
 
-  #setPermission(type: PermissionType, permission: Permission) {
+  #setPermission(type: PermissionNameWithAll, permission: Permission) {
     const permissionFlag = (() => {
       switch (type) {
         case "read":
@@ -153,10 +168,12 @@ export class Program {
           return "--allow-ffi";
         case "env":
           return "--allow-env";
+        case "sys":
+          return "--allow-sys";
+        case "hrtime":
+          return "--allow-hrtime";
         case "all":
           return "--allow-all";
-        default:
-          throw new Error(`type: ${type} not handled`);
       }
     })();
     const finalPermissionForm =
