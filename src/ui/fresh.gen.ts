@@ -7,7 +7,7 @@ import * as $_app from "./routes/_app.tsx";
 import * as $api_apps from "./routes/api/apps.ts";
 import * as $index from "./routes/index.tsx";
 import * as $Main from "./islands/Main.tsx";
-import { type Manifest } from "$fresh/server.ts";
+import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {

@@ -7,6 +7,7 @@ export interface PermissionMap {
   run: Permission;
   ffi: Permission;
   net: Permission;
+  sys: Permission;
   all: Permission;
 }
 
