@@ -13,7 +13,7 @@ https://github.com/sigmasd/deno-seal/releases
 deno --config src/ui/deno.json -A src/webview/webview.ts
 ```
 
-** Compile **
+**Compile**
 
 ```bash
 deno compile --no-check --config src/ui/deno.json --include src/ui/ -A src/webview/webview.ts
