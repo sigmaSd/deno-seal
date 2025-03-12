@@ -314,6 +314,17 @@ function AppSetting(
     permission.allowed = newState;
   };
 
+  // Handle input changes for allowed paths
+  const handlePathChange = (event: Event) => {
+    // Always set pending changes to true when paths are modified
+    pendingChanges.value = true;
+
+    // Update the permission entries
+    permission.entries = (event.target as HTMLInputElement).value
+      ? (event.target as HTMLInputElement).value.split(",")
+      : undefined;
+  };
+
   // Make sure our local state stays in sync with the permission object
   useEffect(() => {
     setIsAllowed(permission.allowed);
@@ -336,7 +347,6 @@ function AppSetting(
           </div>
         </div>
 
-        {/* Simpler toggle button that's easier to debug */}
         <button
           onClick={togglePermission}
           className={`relative inline-flex h-6 w-11 items-center rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 ${
@@ -364,14 +374,7 @@ function AppSetting(
             Allowed paths or domains (comma separated)
           </label>
           <input
-            onChange={(event) => {
-              pendingChanges.value = true;
-              // @ts-ignore value exists
-              permission.entries = event.target?.value
-                // @ts-ignore value exists
-                ? event.target.value.split(",")
-                : undefined;
-            }}
+            onInput={handlePathChange}
             type="text"
             className="block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-200"
             placeholder={`Enter allowed ${name.toLowerCase()} paths or patterns`}
