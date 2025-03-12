@@ -55,7 +55,9 @@ jobs:
           }
 
       - name: Compile App
-        run: deno compile --output ${{ steps.set_binary_name.outputs.binary_name }} --no-check --config src/ui/deno.json --include src/ui/ -A src/webview/webview.ts
+        run: |
+          cd src/ui && deno task build
+          deno compile --output ${{ steps.set_binary_name.outputs.binary_name }} --no-check --config src/ui/deno.json --include src/ui/ -A src/webview/webview.ts
 
       - name: Upload App
         uses: svenstaro/upload-release-action@v2
