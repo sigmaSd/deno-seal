@@ -13,6 +13,9 @@ jobs:
     name: Build and Upload (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     continue-on-error: true # Allow individual OS builds to fail
+    defaults:
+      run:
+        shell: pwsh # Use PowerShell for all steps in this job
     strategy:
       matrix:
         os:
@@ -44,11 +47,12 @@ jobs:
       - name: Set Binary Name
         id: set_binary_name
         run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            echo "binary_name=deno-seal-${{ matrix.binary_suffix }}.exe" >> $GITHUB_OUTPUT
-          else
-            echo "binary_name=deno-seal-${{ matrix.binary_suffix }}" >> $GITHUB_OUTPUT
-          fi
+          if ($env:RUNNER_OS -eq 'Windows') {
+            echo "binary_name=deno-seal-${{ matrix.binary_suffix }}.exe" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          }
+          else {
+            echo "binary_name=deno-seal-${{ matrix.binary_suffix }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          }
 
       - name: Compile App
         run: deno compile --output ${{ steps.set_binary_name.outputs.binary_name }} --no-check --config src/ui/deno.json --include src/ui/ -A src/webview/webview.ts
