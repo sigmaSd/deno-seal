@@ -65,6 +65,7 @@ function AppList(
   };
   const programList: Signal<string[]> = useSignal([]);
   const loading = useSignal(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetch("/api/apps")
@@ -78,6 +79,11 @@ function AppList(
       });
   }, []);
 
+  // Filter applications based on search term
+  const filteredApps = programList.value?.filter((app) =>
+    app.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading.value) {
     return (
       <div className="flex justify-center p-8">
@@ -88,42 +94,102 @@ function AppList(
   }
 
   return (
-    <div className="flex flex-col gap-2 max-h-[70vh] overflow-y-auto pr-2">
-      {programList.value?.length === 0
-        ? <p className="text-gray-400 text-center">No applications found</p>
-        : (
-          programList.value?.map((name) => {
-            const isActive = currentApp.value === name;
-            return (
-              <button
-                key={name}
-                type="button"
-                onClick={() => chooseApp(name)}
-                className={`flex items-center p-3 rounded-lg transition-all text-left ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "bg-gray-700 text-gray-200 hover:bg-gray-600"
-                }`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-                <span className="font-medium truncate">{name}</span>
-              </button>
-            );
-          })
+    <div className="flex flex-col gap-4">
+      {/* Search input */}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <svg
+            className="w-4 h-4 text-gray-400"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 20 20"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+            />
+          </svg>
+        </div>
+        <input
+          type="search"
+          className="block w-full p-2 pl-10 text-sm bg-gray-700 border border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-400"
+          placeholder="Search applications..."
+          value={searchTerm}
+          onInput={(e) => setSearchTerm((e.target as HTMLInputElement).value)}
+        />
+        {searchTerm && (
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 flex items-center pr-3"
+            onClick={() => setSearchTerm("")}
+          >
+            <svg
+              className="w-4 h-4 text-gray-400 hover:text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         )}
+      </div>
+
+      {/* Application list */}
+      <div className="flex flex-col gap-2 max-h-[65vh] overflow-y-auto pr-2">
+        {filteredApps?.length === 0
+          ? (
+            <div className="text-gray-400 text-center py-4">
+              {searchTerm
+                ? <p>No applications match your search</p>
+                : <p>No applications found</p>}
+            </div>
+          )
+          : (
+            filteredApps?.map((name) => {
+              const isActive = currentApp.value === name;
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => chooseApp(name)}
+                  className={`flex items-center p-3 rounded-lg transition-all text-left ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "bg-gray-700 text-gray-200 hover:bg-gray-600"
+                  }`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  <span className="font-medium truncate">{name}</span>
+                </button>
+              );
+            })
+          )}
+      </div>
     </div>
   );
 }
