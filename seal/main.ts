@@ -1,5 +1,5 @@
 import homeDir from "https://deno.land/x/dir@1.5.1/home_dir/mod.ts";
-import * as path from "https://deno.land/std@0.204.0/path/mod.ts";
+import * as path from "jsr:@std/path@1.0.8";
 import * as infer from "jsr:@sigmasd/deno-infer@3.0.1";
 
 export type Permission = { allowed: boolean; entries?: string[] };
@@ -56,9 +56,6 @@ export class Program {
       case "sys":
         this.setSys(permission);
         break;
-      case "hrtime":
-        this.setHrtime(permission);
-        break;
       case "all":
         this.setAll(permission);
         break;
@@ -106,13 +103,6 @@ export class Program {
   }
   setSys(permission: Permission) {
     this.#setPermission("sys", permission);
-    return this;
-  }
-  hrtime(): Permission {
-    return this.#parsePermission("--allow-hrtime");
-  }
-  setHrtime(permission: Permission) {
-    this.#setPermission("hrtime", permission);
     return this;
   }
   ffi(): Permission {
@@ -170,8 +160,6 @@ export class Program {
           return "--allow-env";
         case "sys":
           return "--allow-sys";
-        case "hrtime":
-          return "--allow-hrtime";
         case "all":
           return "--allow-all";
       }

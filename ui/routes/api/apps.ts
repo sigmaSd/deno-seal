@@ -29,7 +29,6 @@ export const handler: Handlers = {
             ffi: app.ffi(),
             net: app.net(),
             sys: app.sys(),
-            hrtime: app.hrtime(),
             all: app.all(),
           } satisfies Record<PermissionNameWithAll, Permission>,
         ));

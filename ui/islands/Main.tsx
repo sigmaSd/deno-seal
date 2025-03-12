@@ -120,11 +120,7 @@ function AppSettingsView(
             permission={app.value.sys}
             pendingChanges={showAcceptButton}
           />
-          <AppSetting
-            name="Hrtime"
-            permission={app.value.hrtime}
-            pendingChanges={showAcceptButton}
-          />
+
           <AppSetting
             name="All"
             permission={app.value.all}
