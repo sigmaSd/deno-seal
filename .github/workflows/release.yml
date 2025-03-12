@@ -2,10 +2,8 @@ name: Release App
 
 on:
   push:
-    branches:
+    tags:
       - "*"
-    # tags:
-    #   - "*"
 
 permissions:
   contents: write
@@ -33,14 +31,11 @@ jobs:
       - name: Compile App
         run: deno compile --output deno-seal --no-check --config src/ui/deno.json --include src/ui/ -A src/webview/webview.ts
 
-      - name: List files (Debug)
-        run: ls -la
-
       - name: Upload App
         uses: svenstaro/upload-release-action@v2
         with:
-          # windows ends with exe
           file: deno-seal*
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }} # Use github.ref_name
           overwrite: true
           file_glob: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Explicitly use GITHUB_TOKEN
