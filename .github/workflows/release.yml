@@ -2,8 +2,10 @@ name: Release App
 
 on:
   push:
-    tags:
+    branches:
       - "*"
+    # tags:
+    #   - "*"
 
 permissions:
   contents: write
@@ -30,6 +32,9 @@ jobs:
 
       - name: Compile App
         run: deno compile --output deno-seal --no-check --config src/ui/deno.json --include src/ui/ -A src/webview/webview.ts
+
+      - name: List files (Debug)
+        run: ls -la
 
       - name: Upload App
         uses: svenstaro/upload-release-action@v2
