@@ -191,13 +191,23 @@ export class Program {
 function* getPrograms() {
   const homeDirPath = homeDir();
   if (!homeDirPath) throw "home dir not found";
-  const programsDir = Deno.readDirSync(path.join(homeDirPath, ".deno", "bin"));
-  for (const entry of programsDir) {
-    if (!entry.isFile) continue;
-    yield {
-      name: entry.name,
-      path: path.join(homeDirPath, ".deno", "bin", entry.name),
-    };
+  try {
+    const programsDir = Deno.readDirSync(
+      path.join(homeDirPath, ".deno", "bin"),
+    );
+    for (const entry of programsDir) {
+      if (!entry.isFile) continue;
+      yield {
+        name: entry.name,
+        path: path.join(homeDirPath, ".deno", "bin", entry.name),
+      };
+    }
+  } catch (e) {
+    if (e instanceof Deno.errors.NotFound) {
+      console.error("No apps found");
+    } else {
+      throw e;
+    }
   }
 }
 
