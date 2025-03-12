@@ -12,7 +12,6 @@ jobs:
   build:
     name: Build and Upload (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    continue-on-error: true # Allow individual OS builds to fail
     defaults:
       run:
         shell: pwsh # Use PowerShell for all steps in this job
@@ -37,7 +36,6 @@ jobs:
             binary_suffix: macos-x64
           - os: macos-latest
             binary_suffix: macos-arm
-      fail-fast: false # IMPORTANT: Run all matrix entries even if some fail
 
     steps:
       - uses: actions/checkout@v4
