@@ -231,6 +231,13 @@ function AppSettingsView(
           </div>
 
           <AppSetting
+            name="All"
+            icon="🔑"
+            description="All permissions"
+            permission={app.value.all}
+            pendingChanges={showAcceptButton}
+          />
+          <AppSetting
             name="Read"
             icon="📁"
             description="Read from file system"
@@ -277,13 +284,6 @@ function AppSettingsView(
             icon="⚙️"
             description="System information access"
             permission={app.value.sys}
-            pendingChanges={showAcceptButton}
-          />
-          <AppSetting
-            name="All"
-            icon="🔑"
-            description="All permissions"
-            permission={app.value.all}
             pendingChanges={showAcceptButton}
           />
         </div>
@@ -362,9 +362,6 @@ function AppSetting(
               isAllowed ? "translate-x-5" : "translate-x-1"
             } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
           />
-          <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white pointer-events-none">
-            {isAllowed ? "ON" : "OFF"}
-          </span>
         </button>
       </div>
 
@@ -373,13 +370,15 @@ function AppSetting(
           <label className="block text-sm font-medium text-gray-300 mb-1">
             Allowed paths or domains (comma separated)
           </label>
-          <input
-            onInput={handlePathChange}
-            type="text"
-            className="block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-200"
-            placeholder={`Enter allowed ${name.toLowerCase()} paths or patterns`}
-            value={permission.entries ? permission.entries.join(",") : ""}
-          />
+          {name !== "All" && (
+            <input
+              onInput={handlePathChange}
+              type="text"
+              className="block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-200"
+              placeholder={`Enter allowed ${name.toLowerCase()} paths or patterns`}
+              value={permission.entries ? permission.entries.join(",") : ""}
+            />
+          )}
         </div>
       )}
     </div>
