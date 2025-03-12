@@ -7,8 +7,10 @@ const webview = new Webview();
 webview.title = "Deno Seal";
 webview.size = { width: 1200, height: 800, hint: SizeHint.NONE };
 
-const port = 8487;
-webview.navigate(`http://localhost:${port}`);
-webview.run();
-worker.terminate();
-Deno.exit(0);
+worker.onmessage = (e) => {
+  const { port } = e.data;
+  webview.navigate(`http://localhost:${port}`);
+  webview.run();
+  worker.terminate();
+  Deno.exit(0);
+};
