@@ -12,6 +12,7 @@ jobs:
   build:
     name: Release App
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
       matrix:
         os:
