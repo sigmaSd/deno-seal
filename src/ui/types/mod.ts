@@ -20,4 +20,8 @@ export type Message =
     method: "updatePermission";
     name: string;
     permissionMap: PermissionMap;
+  }
+  | {
+    method: "showCode";
+    name: string;
   };

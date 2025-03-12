@@ -49,6 +49,31 @@ export const handler: Handlers = {
         app.commit();
         return new Response();
       }
+      case "showCode": {
+        const name = message.name;
+        const app = MAP[name];
+        open(app.realPath());
+        return new Response();
+      }
     }
   },
 };
+
+function open(path: string) {
+  if (path.startsWith("jsr:")) {
+    path = `https://jsr.io/${path.replace(/^jsr:/, "")}`;
+  }
+  if (path.startsWith("npm:")) {
+    path = `https://www.npmjs.com/package/${path.replace(/^npm:/, "")}`;
+  }
+
+  const openCommand = Deno.build.os === "windows"
+    ? ["cmd", "/c", "start"]
+    : Deno.build.os === "darwin"
+    ? ["open"]
+    : ["xdg-open"];
+
+  new Deno.Command(openCommand[0], {
+    args: [...openCommand.slice(1), path],
+  }).spawn();
+}

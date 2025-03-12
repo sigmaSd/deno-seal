@@ -1,6 +1,7 @@
 import homeDir from "https://deno.land/x/dir@1.5.1/home_dir/mod.ts";
 import * as path from "jsr:@std/path@1.0.8";
 import * as infer from "jsr:@sigmasd/deno-infer@3.0.1";
+import assert from "node:assert";
 
 export type Permission = { allowed: boolean; entries?: string[] };
 export type PermissionNameWithAll = Deno.PermissionName | "all";
@@ -186,6 +187,27 @@ export class Program {
       }
     }
   }
+
+  realPath(): string {
+    const urlRegex = /(file:\/\/\/.*?|https:\/\/.*?|jsr:@.*?|npm:.*?)(?=['"])/g;
+    const matches = [...this.originalCmd.matchAll(urlRegex)].map((match) =>
+      match[1]
+    );
+
+    // heuristics:
+    // 1. find the last file:// url
+    const lastFileUrl = matches.findLast((match) =>
+      match.startsWith("file:///")
+    );
+    if (lastFileUrl) return lastFileUrl;
+    // 2. use the last url
+    const lastUrl = matches.at(-1);
+    assert(
+      lastUrl,
+      `at lest one url should be present in the script: ${this.originalCmd}`,
+    );
+    return lastUrl;
+  }
 }
 
 function* getPrograms() {
@@ -227,7 +249,7 @@ export async function createProgramMap() {
 if (import.meta.main) {
   const programMap = await createProgramMap();
   for (const [n, p] of Object.entries(programMap)) {
-    console.log(n);
+    console.log(n, p.realPath());
     console.log("read", p.read());
     console.log("write", p.write());
     console.log("run", p.run());
