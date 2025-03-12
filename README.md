@@ -2,6 +2,11 @@
 
 FlatSeal like permission manager for deno scripts
 
+## Download
+
+Binaries are built with github ci and are available at
+https://github.com/denoland/deno_seal/releases
+
 ## Usage
 
 ```bash
