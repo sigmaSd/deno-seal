@@ -1,0 +1,41 @@
+name: Release App
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Release App
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            windows-latest,
+            macos-13,
+            macos-latest,
+          ]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: denoland/setup-deno@v2
+
+      - name: Compile App
+        run: deno compile --output deno-seal --no-check --config src/ui/deno.json --include src/ui/ -A src/webview/webview.ts
+
+      - name: Upload App
+        uses: svenstaro/upload-release-action@v2
+        with:
+          # windows ends with exe
+          file: deno-seal*
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
