@@ -5,5 +5,11 @@ FlatSeal like permission manager for deno scripts
 ## Usage
 
 ```bash
-deno -A --config https://raw.githubusercontent.com/sigmaSd/deno-seal/refs/heads/master/src/ui/deno.json https://raw.githubusercontent.com/sigmaSd/deno-seal/refs/heads/master/src/webview/webview.ts
+deno --config src/ui/deno.json -A src/webview/webview.ts
+```
+
+** Compile **
+
+```bash
+deno compile --no-check --config src/ui/deno.json --include src/ui/ -A src/webview/webview.ts
 ```

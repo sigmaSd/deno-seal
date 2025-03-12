@@ -4,9 +4,11 @@ import twindConfig from "./twind.config.ts";
 
 const port = 8487;
 export default defineConfig({
-  onListen: () => {
-    if (self) {
+  onListen: ({ port }) => {
+    if (self?.postMessage) {
       self.postMessage({ port });
+    } else {
+      console.log(`Listening on http://localhost:${port}`);
     }
   },
   hostname: "localhost",
