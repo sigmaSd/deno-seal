@@ -63,4 +63,3 @@ jobs:
           file: ${{ steps.set_binary_name.outputs.binary_name }} # Use the dynamic name
           tag: ${{ github.ref_name }}
           overwrite: true # Important: Overwrite previous uploads *for the same OS*
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
