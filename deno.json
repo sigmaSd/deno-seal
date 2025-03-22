@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "run": "deno run -A --config src/ui/deno.json src/webview/webview.ts",
+    "build:ui": "cd src/ui && deno task build",
+    "compile": {
+      "command": "deno compile --no-check --output deno-seal -A --include src/ui/main.ts --include src/ui/deno.json --include src/ui/_fresh --config src/ui/deno.json src/webview/webview.ts",
+      "dependencies": ["build:ui"]
+    },
+    "install": {
+      "command": "deno -A jsr:@sigmasd/install-app install deno-seal",
+      "dependencies": ["compile"]
+    }
+  }
+}
