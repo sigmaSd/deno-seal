@@ -9,10 +9,22 @@
         "build:ui"
       ]
     },
+    "compile:adw": {
+      "command": "deno compile --no-check --output deno-seal -A --include src/ui/main.ts --include src/ui/deno.json --include src/ui/_fresh --config src/ui/deno.json src/webview/webview_adw.ts",
+      "dependencies": [
+        "build:ui"
+      ]
+    },
     "install": {
       "command": "deno -A jsr:@sigmasd/install-app install deno-seal",
       "dependencies": [
         "compile"
+      ]
+    },
+    "install:adw": {
+      "command": "deno -A jsr:@sigmasd/install-app install deno-seal",
+      "dependencies": [
+        "compile:adw"
       ]
     }
   }
