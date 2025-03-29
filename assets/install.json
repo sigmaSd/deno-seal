@@ -1,6 +1,7 @@
 {
   "name": "Deno Seal",
+  "id": "io.github.sigmasd.deno-seal",
   "version": "0.1.0",
-  "description": "My awesome Deno application",
+  "description": "Monitor deno apps permissions",
   "icon": "icon.svg"
 }
